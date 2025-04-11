@@ -181,6 +181,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 // Verifica se é admin e configura as abas
                 isAdmin = data.user.role === 'admin';
                 if (isAdmin) {
+                    const chatContainer = document.querySelector('.chat-container');
+                    chatContainer.classList.add('admin');
+                    
                     const chatTabs = document.querySelector('.chat-tabs');
                     const adminTabButton = document.querySelector('.admin-tab');
                     
@@ -237,6 +240,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         sendButton.disabled = true;
     }
 
+    function scrollToBottom() {
+        const messagesContainer = document.querySelector('#chat-messages');
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
     function addMessage(message, isUser = false) {
         const messageElement = document.createElement('div');
         messageElement.classList.add('message');
@@ -255,13 +263,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         `;
         
         chatMessages.appendChild(messageElement);
-        chatMessages.scrollTop = chatMessages.scrollHeight;
+        scrollToBottom();
     }
 
     // Eventos do Socket.IO
     socket.on('connect', () => {
         connectionStatus.textContent = 'Conectado';
         connectionStatus.classList.add('connected');
+        scrollToBottom();
     });
 
     socket.on('disconnect', () => {
@@ -288,6 +297,17 @@ document.addEventListener('DOMContentLoaded', async () => {
             li.textContent = spectator;
             spectatorsList.appendChild(li);
         });
+    });
+
+    // Observar mudanças no container de mensagens para auto-scroll
+    const messagesContainer = document.querySelector('#chat-messages');
+    const observer = new MutationObserver(() => {
+        scrollToBottom();
+    });
+
+    observer.observe(messagesContainer, {
+        childList: true,
+        subtree: true
     });
 
     // Eventos de formulário

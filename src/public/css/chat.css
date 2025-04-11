@@ -22,11 +22,19 @@ body {
 .chat-container {
     position: relative;
     height: 100%;
-    max-height: calc(100vh - 60px); /* 60px é a altura aproximada do navbar */
+    max-height: calc(100vh - 60px);
     display: flex;
     flex-direction: column;
     background-color: var(--bg-dark);
     overflow: hidden;
+}
+
+.chat-container.admin {
+    max-height: calc(100vh - 60px);
+}
+
+.chat-container:not(.admin) {
+    max-height: calc(100vh - 60px);
 }
 
 .chat-header {
@@ -58,6 +66,12 @@ body {
     padding: 1rem;
     background-color: var(--bg-darker);
     min-height: 0;
+    margin-bottom: 60px; /* Espaço para o input */
+    height: calc(100% - 160px); /* Altura base para usuários normais */
+}
+
+.chat-container.admin #chat-messages {
+    height: calc(100% - 145px); /* Altura para admin (60px do input + 24px das abas) */
 }
 
 .message {
@@ -68,6 +82,10 @@ body {
     display: flex;
     flex-direction: column;
     gap: 0.2rem;
+}
+
+.message:last-child {
+    margin-bottom: 0.5rem; /* Adiciona margem apenas na última mensagem */
 }
 
 .message-header {
@@ -100,17 +118,20 @@ body {
 }
 
 .chat-input-container {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
     padding: 0.8rem;
     background-color: var(--bg-darker);
     border-top: 1px solid var(--border-color);
-    position: sticky;
-    bottom: 0;
     z-index: 2;
 }
 
 #chat-form {
     display: flex;
     gap: 0.5rem;
+    max-width: 100%;
 }
 
 #message-input {
@@ -274,32 +295,25 @@ body {
 
 /* Estilo das abas */
 .chat-tabs {
-    background-color: var(--bg-color);
-    border-bottom: 1px solid var(--border-color);
-    padding: 0.5rem;
-}
-
-.tab-buttons {
     display: flex;
     gap: 0.5rem;
-    margin-bottom: 0.5rem;
+    padding: 0.5rem;
+    background-color: var(--bg-darker);
+    border-bottom: 1px solid var(--border-color);
 }
 
 .tab-button {
+    padding: 0.5rem 1rem;
     background-color: transparent;
     border: none;
-    color: var(--text-color);
-    padding: 0.5rem 1rem;
+    color: var(--text-secondary);
     cursor: pointer;
-    border-radius: 0.25rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    transition: all 0.3s ease;
+    border-radius: 4px;
+    transition: all 0.3s;
 }
 
 .tab-button:hover {
-    background-color: var(--hover-color);
+    background-color: var(--bg-light);
 }
 
 .tab-button.active {
@@ -307,14 +321,9 @@ body {
     color: white;
 }
 
-.tab-button i {
-    font-size: 1rem;
-}
-
-/* Conteúdo das abas */
 .tab-content {
     display: none;
-    height: calc(100% - 3rem);
+    height: 100%;
 }
 
 .tab-content.active {
