@@ -4,12 +4,16 @@ let currentStreamUrl = '';
 
 // Inicialização do player
 document.addEventListener('DOMContentLoaded', () => {
-    player = videojs('videoPlayer', {
+    const video = document.getElementById('player');
+    const streamStatus = document.querySelector('.stream-status');
+    
+    // Configurações do player
+    const playerOptions = {
+        autoplay: true,
+        muted: true,
+        controls: true,
         fluid: true,
         aspectRatio: '16:9',
-        autoplay: true,
-        controls: true,
-        preload: 'auto',
         playbackRates: [0.5, 1, 1.5, 2],
         controlBar: {
             children: [
@@ -24,8 +28,91 @@ document.addEventListener('DOMContentLoaded', () => {
                 'playbackRateMenuButton',
                 'fullscreenToggle'
             ]
+        },
+        html5: {
+            hls: {
+                overrideNative: true,
+                debug: false,
+                enableWorker: true,
+                lowLatencyMode: true,
+                backBufferLength: 90,
+                maxBufferLength: 30,
+                maxMaxBufferLength: 600,
+                maxBufferSize: 60 * 1000 * 1000,
+                maxBufferHole: 0.5,
+                manifestLoadingTimeOut: 10000,
+                manifestLoadingMaxRetry: 3,
+                manifestLoadingRetryDelay: 1000,
+                levelLoadingTimeOut: 10000,
+                levelLoadingMaxRetry: 3,
+                levelLoadingRetryDelay: 1000,
+                fragLoadingTimeOut: 20000,
+                fragLoadingMaxRetry: 3,
+                fragLoadingRetryDelay: 1000
+            }
         }
+    };
+
+    // Inicializar o player
+    const player = videojs('player', playerOptions);
+
+    // Configurar a fonte do vídeo
+    player.src({
+        src: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8',
+        type: 'application/x-mpegURL'
     });
+
+    // Eventos do player
+    player.on('loadedmetadata', () => {
+        console.log('Metadata carregada');
+        updateStreamStatus(true);
+    });
+
+    player.on('error', (error) => {
+        console.error('Erro no player:', error);
+        updateStreamStatus(false);
+    });
+
+    player.on('waiting', () => {
+        console.log('Player aguardando dados...');
+    });
+
+    player.on('playing', () => {
+        console.log('Player iniciou a reprodução');
+        updateStreamStatus(true);
+    });
+
+    player.on('pause', () => {
+        console.log('Player pausado');
+    });
+
+    // Função para atualizar o status da stream
+    function updateStreamStatus(isLive) {
+        if (isLive) {
+            streamStatus.textContent = 'AO VIVO';
+            streamStatus.classList.remove('offline');
+            streamStatus.classList.add('live');
+        } else {
+            streamStatus.textContent = 'Offline';
+            streamStatus.classList.remove('live');
+            streamStatus.classList.add('offline');
+        }
+    }
+
+    // Verificar status inicial
+    updateStreamStatus(false);
+
+    // Verificar status da stream periodicamente
+    setInterval(async () => {
+        try {
+            const response = await fetch('/api/stream/status');
+            const data = await response.json();
+            updateStreamStatus(data.isLive);
+        } catch (error) {
+            console.error('Erro ao verificar status da stream:', error);
+            updateStreamStatus(false);
+        }
+    }, 30000); // Verifica a cada 30 segundos
 
     // Configurar qualidade automática
     player.on('loadedmetadata', () => {
@@ -51,6 +138,13 @@ document.addEventListener('DOMContentLoaded', () => {
         
         if (info.url && info.url !== currentStreamUrl) {
             updateStreamUrl(info.url);
+        }
+    });
+
+    // Limpar recursos ao fechar a página
+    window.addEventListener('beforeunload', () => {
+        if (player) {
+            player.dispose();
         }
     });
 });
@@ -96,11 +190,4 @@ function toggleTheaterMode() {
     chatContainer.classList.toggle('theater-mode');
     
     player.fluid(true); // Atualiza o tamanho do player
-}
-
-// Limpar recursos ao fechar a página
-window.addEventListener('beforeunload', () => {
-    if (player) {
-        player.dispose();
-    }
-}); 
+} 
