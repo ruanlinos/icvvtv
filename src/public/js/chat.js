@@ -240,8 +240,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     function addMessage(message, isUser = false) {
         const messageElement = document.createElement('div');
         messageElement.classList.add('message');
-        messageElement.classList.add(isUser ? 'user' : 'system');
-        messageElement.textContent = message;
+        
+        const time = new Date(message.timestamp).toLocaleTimeString('pt-BR', {
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+        
+        messageElement.innerHTML = `
+            <div class="message-header">
+                <span class="message-username">${message.username}</span>
+                <span class="message-time">${time}</span>
+            </div>
+            <div class="message-content">${message.text}</div>
+        `;
+        
         chatMessages.appendChild(messageElement);
         chatMessages.scrollTop = chatMessages.scrollHeight;
     }
@@ -249,18 +261,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Eventos do Socket.IO
     socket.on('connect', () => {
         connectionStatus.textContent = 'Conectado';
-        connectionStatus.classList.remove('disconnected');
         connectionStatus.classList.add('connected');
     });
 
     socket.on('disconnect', () => {
         connectionStatus.textContent = 'Desconectado';
         connectionStatus.classList.remove('connected');
-        connectionStatus.classList.add('disconnected');
     });
 
-    socket.on('chat message', (data) => {
-        addMessage(`${data.user}: ${data.message}`);
+    socket.on('chat:message', (message) => {
+        addMessage(message);
+    });
+
+    socket.on('chat:error', (error) => {
+        showNotification(error.message, 'error');
     });
 
     socket.on('system message', (message) => {
@@ -279,15 +293,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Eventos de formulário
     messageForm.addEventListener('submit', (e) => {
         e.preventDefault();
-        if (!isAuthenticated) {
-            showLoginOverlay();
-            return;
-        }
-
         const message = messageInput.value.trim();
-        if (message) {
-            socket.emit('chat message', message);
-            addMessage(message, true);
+        if (message && isAuthenticated) {
+            const token = localStorage.getItem('token');
+            socket.emit('chat:message', {
+                message: message,
+                token: token
+            });
             messageInput.value = '';
         }
     });

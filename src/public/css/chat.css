@@ -70,19 +70,26 @@ body {
     gap: 0.2rem;
 }
 
+.message-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.2rem;
+}
+
 .message-username {
     font-weight: bold;
     color: var(--primary-color);
 }
 
-.message-content {
-    color: var(--text-primary);
-}
-
 .message-time {
     font-size: 0.7rem;
     color: var(--text-secondary);
-    align-self: flex-end;
+}
+
+.message-content {
+    color: var(--text-primary);
+    word-break: break-word;
 }
 
 .system-message {
