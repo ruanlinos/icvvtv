@@ -78,41 +78,64 @@ io.on('connection', (socket) => {
         }
     });
 
-    socket.on('chat message', async (data) => {
+    // Eventos de chat
+    socket.on('chat:message', async (data) => {
         try {
             const token = data.token;
-            if (!token) {
-                socket.emit('system message', 'Você precisa estar autenticado para enviar mensagens');
-                return;
-            }
-
             const decoded = jwt.verify(token, process.env.JWT_SECRET);
             const user = await User.findById(decoded.userId);
-            
+
             if (!user) {
-                socket.emit('system message', 'Usuário não encontrado');
+                socket.emit('chat:error', { message: 'Usuário não encontrado' });
                 return;
             }
 
-            const messageData = {
+            const message = {
                 username: user.username,
-                message: data.message,
+                text: data.message,
                 timestamp: new Date()
             };
 
             // Adicionar mensagem ao histórico
-            chatMessages.push(messageData);
-
-            // Limitar o histórico a 100 mensagens
+            chatMessages.push(message);
             if (chatMessages.length > 100) {
                 chatMessages.shift();
             }
 
-            // Enviar mensagem para todos os usuários
-            io.emit('chat message', messageData);
+            // Emitir mensagem para todos os usuários
+            io.emit('chat:message', message);
         } catch (error) {
             console.error('Erro ao processar mensagem:', error);
-            socket.emit('system message', 'Erro ao enviar mensagem');
+            socket.emit('chat:error', { message: 'Erro ao enviar mensagem' });
+        }
+    });
+
+    // Eventos de stream
+    socket.on('stream:update', async (data) => {
+        try {
+            const settings = await StreamSettings.findOne();
+            if (settings) {
+                await settings.updateSettings(data.title, data.description, data.streamUrl);
+                io.emit('stream:update', {
+                    title: data.title,
+                    description: data.description,
+                    streamUrl: data.streamUrl
+                });
+            }
+        } catch (error) {
+            console.error('Erro ao atualizar stream:', error);
+        }
+    });
+
+    socket.on('stream:status', async (data) => {
+        try {
+            const settings = await StreamSettings.findOne();
+            if (settings) {
+                await settings.toggleLive(data.isLive);
+                io.emit('stream:status', { isLive: data.isLive });
+            }
+        } catch (error) {
+            console.error('Erro ao alterar status da stream:', error);
         }
     });
 

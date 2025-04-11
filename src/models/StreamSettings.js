@@ -3,19 +3,19 @@ const mongoose = require('mongoose');
 const streamSettingsSchema = new mongoose.Schema({
     title: {
         type: String,
-        default: 'Transmissão ao Vivo'
+        default: 'ICVV TV - Live'
     },
     description: {
         type: String,
-        default: 'Sem descrição'
-    },
-    streamUrl: {
-        type: String,
-        required: true
+        default: ''
     },
     isLive: {
         type: Boolean,
         default: false
+    },
+    streamUrl: {
+        type: String,
+        default: ''
     },
     viewerCount: {
         type: Number,
@@ -49,17 +49,29 @@ const streamSettingsSchema = new mongoose.Schema({
     }
 });
 
-// Método para atualizar contagem de visualizações
-streamSettingsSchema.methods.updateViewerCount = function(count) {
+// Método para atualizar o contador de visualizações
+streamSettingsSchema.methods.updateViewerCount = async function(count) {
     this.viewerCount = count;
-    return this.save();
+    this.lastUpdated = Date.now();
+    await this.save();
 };
 
-// Método para atualizar status da transmissão
-streamSettingsSchema.methods.updateStreamStatus = function(isLive) {
+// Método para atualizar as configurações da live
+streamSettingsSchema.methods.updateSettings = async function(settings) {
+    if (settings.title) this.title = settings.title;
+    if (settings.description) this.description = settings.description;
+    if (settings.streamUrl) this.streamUrl = settings.streamUrl;
+    this.lastUpdated = Date.now();
+    await this.save();
+};
+
+// Método para iniciar/parar a live
+streamSettingsSchema.methods.toggleLive = async function(isLive) {
     this.isLive = isLive;
     this.lastUpdated = Date.now();
-    return this.save();
+    await this.save();
 };
 
-module.exports = mongoose.model('StreamSettings', streamSettingsSchema); 
+const StreamSettings = mongoose.model('StreamSettings', streamSettingsSchema);
+
+module.exports = StreamSettings; 

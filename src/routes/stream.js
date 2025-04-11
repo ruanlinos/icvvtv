@@ -1,74 +1,81 @@
 const express = require('express');
 const router = express.Router();
+const jwt = require('jsonwebtoken');
+const User = require('../models/User');
 const StreamSettings = require('../models/StreamSettings');
 const { auth, isAdmin } = require('../middleware/auth');
 
-// Obter configurações da transmissão
-router.get('/settings', async (req, res) => {
+// Middleware para verificar se o usuário é administrador
+const isAdminMiddleware = async (req, res, next) => {
     try {
-        let settings = await StreamSettings.findOne();
-        
-        if (!settings) {
-            settings = await StreamSettings.create({
-                streamUrl: 'https://example.com/stream.m3u8',
-                title: 'Transmissão ao Vivo',
-                description: 'Bem-vindo à nossa transmissão!'
-            });
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) {
+            return res.status(401).json({ message: 'Token não fornecido' });
         }
 
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const user = await User.findById(decoded.userId);
+        
+        if (!user || user.role !== 'admin') {
+            return res.status(403).json({ message: 'Acesso negado' });
+        }
+
+        req.user = user;
+        next();
+    } catch (error) {
+        res.status(401).json({ message: 'Token inválido' });
+    }
+};
+
+// Obter configurações da live
+router.get('/settings', async (req, res) => {
+    try {
+        const settings = await StreamSettings.findOne();
+        if (!settings) {
+            const newSettings = new StreamSettings();
+            await newSettings.save();
+            return res.json(newSettings);
+        }
         res.json(settings);
     } catch (error) {
         console.error('Erro ao obter configurações:', error);
-        res.status(500).json({ message: 'Erro ao obter configurações' });
+        res.status(500).json({ message: 'Erro no servidor' });
     }
 });
 
-// Atualizar configurações da transmissão (requer admin)
-router.put('/settings', auth, isAdmin, async (req, res) => {
+// Atualizar configurações da live (apenas admin)
+router.put('/settings', isAdminMiddleware, async (req, res) => {
     try {
-        const {
-            title,
-            description,
-            streamUrl,
-            isLive,
-            settings
-        } = req.body;
-
-        let streamSettings = await StreamSettings.findOne();
-        
-        if (!streamSettings) {
-            streamSettings = new StreamSettings();
+        const settings = await StreamSettings.findOne();
+        if (!settings) {
+            return res.status(404).json({ message: 'Configurações não encontradas' });
         }
 
-        // Atualizar campos
-        if (title) streamSettings.title = title;
-        if (description) streamSettings.description = description;
-        if (streamUrl) streamSettings.streamUrl = streamUrl;
-        if (typeof isLive === 'boolean') streamSettings.isLive = isLive;
-        if (settings) {
-            streamSettings.settings = {
-                ...streamSettings.settings,
-                ...settings
-            };
-        }
-
-        streamSettings.updatedBy = req.user._id;
-        streamSettings.lastUpdated = Date.now();
-
-        await streamSettings.save();
-
-        // Emitir atualização via Socket.IO
-        req.app.get('io').emit('stream info', {
-            title: streamSettings.title,
-            description: streamSettings.description,
-            url: streamSettings.streamUrl,
-            isLive: streamSettings.isLive
-        });
-
-        res.json(streamSettings);
+        await settings.updateSettings(req.body);
+        res.json({ message: 'Configurações atualizadas com sucesso', settings });
     } catch (error) {
         console.error('Erro ao atualizar configurações:', error);
-        res.status(500).json({ message: 'Erro ao atualizar configurações' });
+        res.status(500).json({ message: 'Erro no servidor' });
+    }
+});
+
+// Iniciar/parar live (apenas admin)
+router.post('/toggle-live', isAdminMiddleware, async (req, res) => {
+    try {
+        const settings = await StreamSettings.findOne();
+        if (!settings) {
+            return res.status(404).json({ message: 'Configurações não encontradas' });
+        }
+
+        const { isLive } = req.body;
+        await settings.toggleLive(isLive);
+        res.json({ 
+            message: isLive ? 'Live iniciada' : 'Live encerrada',
+            settings 
+        });
+    } catch (error) {
+        console.error('Erro ao alterar status da live:', error);
+        res.status(500).json({ message: 'Erro no servidor' });
     }
 });
 

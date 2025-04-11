@@ -263,4 +263,105 @@ body {
         position: sticky;
         bottom: 0;
     }
+}
+
+/* Estilo das abas */
+.chat-tabs {
+    background-color: var(--bg-color);
+    border-bottom: 1px solid var(--border-color);
+    padding: 0.5rem;
+}
+
+.tab-buttons {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.tab-button {
+    background-color: transparent;
+    border: none;
+    color: var(--text-color);
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    border-radius: 0.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+.tab-button:hover {
+    background-color: var(--hover-color);
+}
+
+.tab-button.active {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.tab-button i {
+    font-size: 1rem;
+}
+
+/* Conteúdo das abas */
+.tab-content {
+    display: none;
+    height: calc(100% - 3rem);
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/* Ajustes para o painel admin */
+.admin-panel {
+    height: 100%;
+    padding: 1rem;
+    background-color: var(--bg-color);
+}
+
+.admin-panel h3 {
+    color: var(--text-color);
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+}
+
+.admin-content {
+    height: calc(100% - 2.5rem);
+    overflow-y: auto;
+}
+
+.admin-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.stat-item {
+    background: var(--bg-primary);
+    padding: 1rem;
+    border-radius: 0.5rem;
+    text-align: center;
+}
+
+.stat-item h4 {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.stat-item p {
+    margin: 0.5rem 0 0;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--primary-color);
+}
+
+.error-message {
+    padding: 1rem;
+    background: var(--error-bg);
+    color: var(--error-text);
+    border-radius: 0.5rem;
+    text-align: center;
 } 
