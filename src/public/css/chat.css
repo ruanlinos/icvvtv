@@ -302,6 +302,12 @@ body {
     border-bottom: 1px solid var(--border-color);
 }
 
+.tab-buttons {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
 .tab-button {
     padding: 0.5rem 1rem;
     background-color: transparent;
