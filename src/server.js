@@ -54,6 +54,13 @@ app.use(sessionMiddleware);
 app.use('/api/auth', authRoutes);
 app.use('/api/stream', streamRoutes);
 
+// Configurar variáveis de ambiente para o frontend
+app.get('/api/config', (req, res) => {
+    res.json({
+        streamUrl: process.env.STREAM_URL
+    });
+});
+
 // Rota principal
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));

@@ -28,6 +28,10 @@ body {
     color: var(--primary-color) !important;
     font-weight: bold;
     font-size: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
 }
 
 .video-container {

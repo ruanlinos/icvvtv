@@ -191,6 +191,7 @@ body {
     opacity: 1;
     visibility: visible;
     pointer-events: auto;
+    display: flex;
 }
 
 .auth-form {
@@ -569,7 +570,6 @@ body {
     border-radius: 0.25rem;
     font-size: 0.9rem;
     font-weight: bold;
-    margin-top: 0.5rem;
     color: white;
 }
 
@@ -592,4 +592,20 @@ body {
     100% {
         opacity: 1;
     }
+}
+
+.chat-input input:disabled {
+    background-color: #2a2a2a;
+    color: #666;
+    cursor: not-allowed;
+    border: 1px solid #333;
+    opacity: 0.7;
+}
+
+.chat-input button:disabled {
+    background-color: #2a2a2a;
+    color: #666;
+    cursor: not-allowed;
+    border: 1px solid #333;
+    opacity: 0.7;
 } 

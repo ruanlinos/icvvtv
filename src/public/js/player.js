@@ -3,9 +3,24 @@ let player = null;
 let currentStreamUrl = '';
 
 // Inicialização do player
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     const video = document.getElementById('player');
     const streamStatus = document.querySelector('.stream-status');
+    const streamTitle = document.querySelector('.stream-title');
+    const streamDescription = document.querySelector('.stream-description');
+    const chatInput = document.querySelector('.chat-input input');
+    const chatSendButton = document.querySelector('.chat-input button');
+    
+    // Buscar configurações do servidor
+    let streamUrl;
+    try {
+        const response = await fetch('/api/config');
+        const config = await response.json();
+        streamUrl = config.streamUrl;
+    } catch (error) {
+        console.error('Erro ao carregar configurações:', error);
+        streamUrl = 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8'; // URL de fallback
+    }
     
     // Configurações do player
     const playerOptions = {
@@ -14,41 +29,13 @@ document.addEventListener('DOMContentLoaded', () => {
         controls: true,
         fluid: true,
         aspectRatio: '16:9',
-        playbackRates: [0.5, 1, 1.5, 2],
-        controlBar: {
-            children: [
-                'playToggle',
-                'volumePanel',
-                'currentTimeDisplay',
-                'timeDivider',
-                'durationDisplay',
-                'progressControl',
-                'liveDisplay',
-                'customControlSpacer',
-                'playbackRateMenuButton',
-                'fullscreenToggle'
-            ]
-        },
+        liveui: true,
         html5: {
             hls: {
                 overrideNative: true,
                 debug: false,
                 enableWorker: true,
-                lowLatencyMode: true,
-                backBufferLength: 90,
-                maxBufferLength: 30,
-                maxMaxBufferLength: 600,
-                maxBufferSize: 60 * 1000 * 1000,
-                maxBufferHole: 0.5,
-                manifestLoadingTimeOut: 10000,
-                manifestLoadingMaxRetry: 3,
-                manifestLoadingRetryDelay: 1000,
-                levelLoadingTimeOut: 10000,
-                levelLoadingMaxRetry: 3,
-                levelLoadingRetryDelay: 1000,
-                fragLoadingTimeOut: 20000,
-                fragLoadingMaxRetry: 3,
-                fragLoadingRetryDelay: 1000
+                lowLatencyMode: true
             }
         }
     };
@@ -58,7 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Configurar a fonte do vídeo
     player.src({
-        src: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8',
+        src: streamUrl,
         type: 'application/x-mpegURL'
     });
 
@@ -92,10 +79,39 @@ document.addEventListener('DOMContentLoaded', () => {
             streamStatus.textContent = 'AO VIVO';
             streamStatus.classList.remove('offline');
             streamStatus.classList.add('live');
+            
+            // Habilitar chat
+            if (chatInput) {
+                chatInput.disabled = false;
+                chatInput.placeholder = 'Digite sua mensagem...';
+            }
+            if (chatSendButton) {
+                chatSendButton.disabled = false;
+                chatSendButton.title = 'Enviar mensagem';
+            }
         } else {
             streamStatus.textContent = 'Offline';
             streamStatus.classList.remove('live');
             streamStatus.classList.add('offline');
+            
+            // Atualizar título e descrição para offline
+            if (streamTitle) {
+                streamTitle.textContent = 'Live Offline';
+            }
+            if (streamDescription) {
+                streamDescription.textContent = 'A transmissão está offline no momento. Volte mais tarde para assistir ao vivo.';
+            }
+            
+            // Desabilitar chat
+            if (chatInput) {
+                chatInput.disabled = true;
+                chatInput.placeholder = 'Chat indisponível enquanto a live estiver offline';
+                chatInput.value = '';
+            }
+            if (chatSendButton) {
+                chatSendButton.disabled = true;
+                chatSendButton.title = 'Chat indisponível';
+            }
         }
     }
 

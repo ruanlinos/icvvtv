@@ -70,12 +70,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Carrega dados da transmissão
             const streamTitle = document.getElementById('stream-title');
             const streamDescription = document.getElementById('stream-description');
-            const streamStatus = document.getElementById('stream-status');
 
-            if (streamTitle && streamDescription && streamStatus) {
+            if (streamTitle && streamDescription) {
                 streamTitle.value = data.stream?.title || '';
                 streamDescription.value = data.stream?.description || '';
-                streamStatus.value = data.stream?.status || 'offline';
             }
 
             // Configura eventos dos botões
@@ -109,17 +107,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                             <label for="stream-description">Descrição</label>
                             <textarea id="stream-description" class="form-control" rows="3"></textarea>
                         </div>
-                        <div class="form-group">
-                            <label for="stream-status">Status da Transmissão</label>
-                            <select id="stream-status" class="form-control">
-                                <option value="offline">Offline</option>
-                                <option value="live">Ao Vivo</option>
-                            </select>
-                        </div>
                         <div class="btn-container">
                             <button type="submit" class="btn btn-primary" id="update-stream">Atualizar</button>
-                            <button type="button" class="btn btn-success" id="start-stream">Iniciar Transmissão</button>
-                            <button type="button" class="btn btn-danger" id="stop-stream">Encerrar Transmissão</button>
                         </div>
                     </form>
                 `;
@@ -459,17 +448,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                                 <label for="stream-description">Descrição</label>
                                 <textarea id="stream-description" class="form-control" rows="3"></textarea>
                             </div>
-                            <div class="form-group">
-                                <label for="stream-status">Status da Transmissão</label>
-                                <select id="stream-status" class="form-control">
-                                    <option value="offline">Offline</option>
-                                    <option value="live">Ao Vivo</option>
-                                </select>
-                            </div>
                             <div class="btn-container">
                                 <button type="submit" class="btn btn-primary" id="update-stream">Atualizar</button>
-                                <button type="button" class="btn btn-success" id="start-stream">Iniciar Transmissão</button>
-                                <button type="button" class="btn btn-danger" id="stop-stream">Encerrar Transmissão</button>
                             </div>
                         </form>
                     </div>
