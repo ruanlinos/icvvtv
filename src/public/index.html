@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ICVV TV - Transmissão ao Vivo</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://vjs.zencdn.net/8.10.0/video-js.css" rel="stylesheet" />
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="bg-dark text-light">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark border-bottom border-secondary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">ICVV TV</a>
+            <div class="d-flex" id="navbarNav">
+                <span class="navbar-text me-3" id="viewerCount">
+                    <i class="fas fa-eye"></i> <span>0</span> assistindo
+                </span>
+                <div id="userInfo" class="d-none">
+                    <span class="navbar-text me-2" id="username"></span>
+                    <button class="btn btn-outline-danger btn-sm" id="logoutBtn">Sair</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Player de Vídeo -->
+            <div class="col-md-8 p-0">
+                <div class="video-container">
+                    <video
+                        id="videoPlayer"
+                        class="video-js vjs-default-skin vjs-big-play-centered"
+                        controls
+                        preload="auto"
+                        data-setup='{}'
+                    >
+                        <p class="vjs-no-js">
+                            Para ver este vídeo, ative o JavaScript e considere atualizar para um
+                            navegador que suporte vídeo HTML5
+                        </p>
+                    </video>
+                </div>
+                <div class="stream-info p-3">
+                    <h3 id="streamTitle">Transmissão ao Vivo</h3>
+                    <p id="streamDescription" class="text-muted">Aguardando início da transmissão...</p>
+                </div>
+            </div>
+            
+            <!-- Chat e Login -->
+            <div class="col-md-4 p-0">
+                <div class="chat-container">
+                    <!-- Área de Login -->
+                    <div id="loginArea" class="p-3">
+                        <h4>Login</h4>
+                        <form id="loginForm">
+                            <div class="mb-3">
+                                <input type="email" class="form-control" id="email" placeholder="Email" required>
+                            </div>
+                            <div class="mb-3">
+                                <input type="password" class="form-control" id="password" placeholder="Senha" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">Entrar</button>
+                        </form>
+                        <div class="mt-3 text-center">
+                            <a href="#" id="showRegister">Criar conta</a>
+                        </div>
+                    </div>
+
+                    <!-- Área de Registro -->
+                    <div id="registerArea" class="p-3 d-none">
+                        <h4>Registro</h4>
+                        <form id="registerForm">
+                            <div class="mb-3">
+                                <input type="text" class="form-control" id="regUsername" placeholder="Nome de usuário" required>
+                            </div>
+                            <div class="mb-3">
+                                <input type="email" class="form-control" id="regEmail" placeholder="Email" required>
+                            </div>
+                            <div class="mb-3">
+                                <input type="password" class="form-control" id="regPassword" placeholder="Senha" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">Registrar</button>
+                        </form>
+                        <div class="mt-3 text-center">
+                            <a href="#" id="showLogin">Já tem conta? Faça login</a>
+                        </div>
+                    </div>
+
+                    <!-- Área do Chat -->
+                    <div id="chatArea" class="d-none">
+                        <div class="chat-messages p-3" id="messages"></div>
+                        <div class="chat-input p-3">
+                            <form id="messageForm" class="d-flex">
+                                <input type="text" class="form-control" id="messageInput" placeholder="Digite sua mensagem...">
+                                <button type="submit" class="btn btn-primary ms-2">Enviar</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://kit.fontawesome.com/your-font-awesome-kit.js"></script>
+    <script src="https://vjs.zencdn.net/8.10.0/video.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/player.js"></script>
+    <script src="/js/main.js"></script>
+</body>
+</html> 
