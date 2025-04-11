@@ -5,6 +5,8 @@ const path = require('path');
 const session = require('express-session');
 const MongoStore = require('connect-mongo');
 const cors = require('cors');
+const jwt = require('jsonwebtoken');
+const User = require('./models/User');
 require('dotenv').config();
 
 const connectDB = require('./config/database');
@@ -57,9 +59,15 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+// Array para armazenar as mensagens da sessão atual
+const chatMessages = [];
+
 // Configuração do Socket.IO
 io.on('connection', (socket) => {
     console.log('Novo usuário conectado');
+
+    // Enviar histórico de mensagens para o novo usuário
+    socket.emit('chat history', chatMessages);
 
     // Incrementar contador de visualizações
     const StreamSettings = require('./models/StreamSettings');
@@ -70,8 +78,42 @@ io.on('connection', (socket) => {
         }
     });
 
-    socket.on('chat message', (msg) => {
-        io.emit('chat message', msg);
+    socket.on('chat message', async (data) => {
+        try {
+            const token = data.token;
+            if (!token) {
+                socket.emit('system message', 'Você precisa estar autenticado para enviar mensagens');
+                return;
+            }
+
+            const decoded = jwt.verify(token, process.env.JWT_SECRET);
+            const user = await User.findById(decoded.userId);
+            
+            if (!user) {
+                socket.emit('system message', 'Usuário não encontrado');
+                return;
+            }
+
+            const messageData = {
+                username: user.username,
+                message: data.message,
+                timestamp: new Date()
+            };
+
+            // Adicionar mensagem ao histórico
+            chatMessages.push(messageData);
+
+            // Limitar o histórico a 100 mensagens
+            if (chatMessages.length > 100) {
+                chatMessages.shift();
+            }
+
+            // Enviar mensagem para todos os usuários
+            io.emit('chat message', messageData);
+        } catch (error) {
+            console.error('Erro ao processar mensagem:', error);
+            socket.emit('system message', 'Erro ao enviar mensagem');
+        }
     });
 
     socket.on('disconnect', () => {

@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const connectionStatus = document.querySelector('.connection-status');
 
     // Função para adicionar mensagem ao chat
-    const addMessage = (username, message, isSystem = false) => {
+    const addMessage = (username, message, isSystem = false, timestamp = null) => {
         const messageDiv = document.createElement('div');
         messageDiv.className = isSystem ? 'system-message' : 'message';
         
@@ -22,6 +22,13 @@ document.addEventListener('DOMContentLoaded', () => {
         contentSpan.className = 'message-content';
         contentSpan.textContent = message;
         messageDiv.appendChild(contentSpan);
+
+        if (timestamp) {
+            const timeSpan = document.createElement('span');
+            timeSpan.className = 'message-time';
+            timeSpan.textContent = new Date(timestamp).toLocaleTimeString();
+            messageDiv.appendChild(timeSpan);
+        }
         
         chatMessages.appendChild(messageDiv);
         chatMessages.scrollTop = chatMessages.scrollHeight;
@@ -49,8 +56,16 @@ document.addEventListener('DOMContentLoaded', () => {
         connectionStatus.style.backgroundColor = '#f44336';
     });
 
+    // Receber histórico de mensagens
+    socket.on('chat history', (messages) => {
+        chatMessages.innerHTML = ''; // Limpar mensagens existentes
+        messages.forEach(msg => {
+            addMessage(msg.username, msg.message, false, msg.timestamp);
+        });
+    });
+
     socket.on('chat message', (data) => {
-        addMessage(data.username, data.message);
+        addMessage(data.username, data.message, false, data.timestamp);
     });
 
     socket.on('system message', (message) => {
