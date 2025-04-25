@@ -118,18 +118,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Verificar status inicial
     updateStreamStatus(false);
 
-    // Verificar status da stream periodicamente
-    setInterval(async () => {
-        try {
-            const response = await fetch('/api/stream/status');
-            const data = await response.json();
-            updateStreamStatus(data.isLive);
-        } catch (error) {
-            console.error('Erro ao verificar status da stream:', error);
-            updateStreamStatus(false);
-        }
-    }, 30000); // Verifica a cada 30 segundos
-
     // Configurar qualidade automática
     player.on('loadedmetadata', () => {
         const qualities = player.qualities();

@@ -11,34 +11,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     const registerForm = document.querySelector('#register-form');
     const showRegisterBtn = document.querySelector('#show-register');
     const showLoginBtn = document.querySelector('#show-login');
-    const tabButtons = document.querySelectorAll('.tab-button');
-    const tabContents = document.querySelectorAll('.tab-content');
-    const chatTabs = document.querySelector('.chat-tabs');
-    const adminTab = document.querySelector('.chat-tab[data-target="admin-tab"]');
     const spectatorsList = document.getElementById('spectators-list');
 
     let isAuthenticated = false;
     let isAdmin = false;
-
-    // Função para verificar se o usuário é admin
-    async function checkAdminStatus() {
-        const token = localStorage.getItem('token');
-        if (!token) return false;
-
-        try {
-            const response = await fetch('/api/auth/verify', {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-            const data = await response.json();
-            console.log('Dados de verificação:', data);
-            return data.user?.role === 'admin' || false;
-        } catch (error) {
-            console.error('Erro ao verificar status de admin:', error);
-            return false;
-        }
-    }
 
     // Função para carregar o conteúdo do painel admin
     async function loadAdminContent() {
@@ -83,37 +59,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             console.error('Erro ao carregar estatísticas:', error);
             const adminContent = document.querySelector('.admin-content');
             if (adminContent) {
-                const errorDiv = document.createElement('div');
-                errorDiv.className = 'error-message';
-                errorDiv.textContent = 'Erro ao carregar estatísticas. Tente novamente mais tarde.';
-                
-                // Limpa o conteúdo anterior
-                adminContent.innerHTML = '';
-                
-                // Adiciona a mensagem de erro
-                adminContent.appendChild(errorDiv);
-                
-                // Mantém o formulário de controle de transmissão
-                const streamControls = document.createElement('div');
-                streamControls.className = 'stream-controls';
-                streamControls.innerHTML = `
-                    <h4>Controle de Transmissão</h4>
-                    <form id="stream-form" class="stream-form">
-                        <div class="form-group">
-                            <label for="stream-title">Título da Transmissão</label>
-                            <input type="text" id="stream-title" class="form-control" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="stream-description">Descrição</label>
-                            <textarea id="stream-description" class="form-control" rows="3"></textarea>
-                        </div>
-                        <div class="btn-container">
-                            <button type="submit" class="btn btn-primary" id="update-stream">Atualizar</button>
-                        </div>
-                    </form>
-                `;
-                adminContent.appendChild(streamControls);
-                
                 // Configura os eventos dos botões mesmo em caso de erro
                 setupStreamControls();
             }
@@ -317,6 +262,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         sendButton.disabled = !messageInput.value.trim() || !isAuthenticated;
     });
 
+    // Função para adicionar mensagem do sistema
+    function addSystemMessage(text) {
+        const message = {
+            username: 'Sistema',
+            text: text,
+            timestamp: new Date()
+        };
+        addMessage(message);
+    }
+
     // Eventos de autenticação
     loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -340,10 +295,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 hideLoginOverlay();
                 updateUserMenu(data.user);
             } else {
-                addMessage('Erro ao fazer login. Verifique suas credenciais.', false);
+                addSystemMessage('Erro ao fazer login. Verifique suas credenciais.');
             }
         } catch (error) {
-            addMessage('Erro ao conectar com o servidor.', false);
+            addSystemMessage('Erro ao conectar com o servidor.');
         }
     });
 
@@ -363,13 +318,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
 
             if (response.ok) {
-                addMessage('Registro realizado com sucesso! Faça login para continuar.', false);
+                addSystemMessage('Registro realizado com sucesso! Faça login para continuar.');
                 showLoginOverlay();
             } else {
-                addMessage('Erro ao registrar. Tente novamente.', false);
+                addSystemMessage('Erro ao registrar. Tente novamente.');
             }
         } catch (error) {
-            addMessage('Erro ao conectar com o servidor.', false);
+            addSystemMessage('Erro ao conectar com o servidor.');
         }
     });
 
@@ -421,22 +376,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         adminTab.innerHTML = `
             <div class="admin-panel">
                 <h3>Painel de Administração</h3>
-                <div class="admin-content">
-                    <div class="admin-stats">
-                        <div class="stat-item">
-                            <h4>Espectadores Online</h4>
-                            <p>0</p>
-                        </div>
-                        <div class="stat-item">
-                            <h4>Mensagens Hoje</h4>
-                            <p>0</p>
-                        </div>
-                        <div class="stat-item">
-                            <h4>Usuários Registrados</h4>
-                            <p>0</p>
-                        </div>
-                    </div>
-
+                <div class="admin-content">         
                     <div class="stream-controls">
                         <h4>Controle de Transmissão</h4>
                         <form id="stream-form" class="stream-form">
@@ -462,9 +402,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Função para configurar controles de transmissão
     function setupStreamControls() {
         const streamForm = document.getElementById('stream-form');
-        const startButton = document.getElementById('start-stream');
-        const stopButton = document.getElementById('stop-stream');
-        const updateButton = document.getElementById('update-stream');
 
         if (streamForm) {
             streamForm.addEventListener('submit', async (e) => {
@@ -492,54 +429,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 } catch (error) {
                     console.error('Erro ao atualizar transmissão:', error);
                     showNotification('Erro ao atualizar transmissão. Tente novamente mais tarde.', 'error');
-                }
-            });
-        }
-
-        if (startButton) {
-            startButton.addEventListener('click', async () => {
-                try {
-                    const response = await fetch('/api/stream/start', {
-                        method: 'POST',
-                        headers: {
-                            'Authorization': `Bearer ${localStorage.getItem('token')}`
-                        }
-                    });
-
-                    if (response.ok) {
-                        document.getElementById('stream-status').value = 'live';
-                        showNotification('Transmissão iniciada com sucesso!', 'success');
-                    } else {
-                        const error = await response.json();
-                        showNotification(error.message || 'Erro ao iniciar transmissão', 'error');
-                    }
-                } catch (error) {
-                    console.error('Erro ao iniciar transmissão:', error);
-                    showNotification('Erro ao iniciar transmissão. Tente novamente mais tarde.', 'error');
-                }
-            });
-        }
-
-        if (stopButton) {
-            stopButton.addEventListener('click', async () => {
-                try {
-                    const response = await fetch('/api/stream/stop', {
-                        method: 'POST',
-                        headers: {
-                            'Authorization': `Bearer ${localStorage.getItem('token')}`
-                        }
-                    });
-
-                    if (response.ok) {
-                        document.getElementById('stream-status').value = 'offline';
-                        showNotification('Transmissão encerrada com sucesso!', 'success');
-                    } else {
-                        const error = await response.json();
-                        showNotification(error.message || 'Erro ao encerrar transmissão', 'error');
-                    }
-                } catch (error) {
-                    console.error('Erro ao encerrar transmissão:', error);
-                    showNotification('Erro ao encerrar transmissão. Tente novamente mais tarde.', 'error');
                 }
             });
         }
@@ -604,72 +493,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Carrega informações iniciais
     loadStreamInfo();
-
-    // Função para criar elemento de mensagem
-    function createMessageElement(message) {
-        const messageElement = document.createElement('div');
-        messageElement.className = 'message';
-        messageElement.dataset.messageId = message.id;
-        
-        const usernameSpan = document.createElement('span');
-        usernameSpan.className = 'message-username';
-        usernameSpan.textContent = message.username;
-        
-        const textSpan = document.createElement('span');
-        textSpan.className = 'message-text';
-        textSpan.textContent = message.text;
-        
-        const timeSpan = document.createElement('span');
-        timeSpan.className = 'message-time';
-        timeSpan.textContent = formatTime(message.timestamp);
-        
-        messageElement.appendChild(usernameSpan);
-        messageElement.appendChild(textSpan);
-        messageElement.appendChild(timeSpan);
-        
-        // Adicionar botão de exclusão se for admin
-        if (isAdmin) {
-            const deleteButton = document.createElement('button');
-            deleteButton.className = 'delete-message';
-            deleteButton.innerHTML = '<i class="fas fa-trash"></i>';
-            deleteButton.onclick = () => deleteMessage(message.id);
-            messageElement.appendChild(deleteButton);
-        }
-        
-        return messageElement;
-    }
-
-    // Função para excluir mensagem
-    async function deleteMessage(messageId) {
-        if (!isAdmin) return;
-        
-        try {
-            const response = await fetch('/api/chat/delete-message', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                },
-                body: JSON.stringify({ messageId })
-            });
-            
-            if (response.ok) {
-                // Remover mensagem do DOM
-                const messageElement = document.querySelector(`.message[data-message-id="${messageId}"]`);
-                if (messageElement) {
-                    messageElement.remove();
-                }
-                
-                // Emitir evento para outros usuários
-                socket.emit('chat:delete', { messageId });
-            } else {
-                showMessage('Erro ao excluir mensagem', 'error');
-            }
-        } catch (error) {
-            console.error('Erro ao excluir mensagem:', error);
-            showMessage('Erro ao excluir mensagem', 'error');
-        }
-    }
 
     // Adicionar listener para eventos de exclusão
     socket.on('chat:delete', ({ messageId }) => {
