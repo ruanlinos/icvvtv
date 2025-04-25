@@ -22,6 +22,9 @@
                 <!-- <span id="viewerCount" class="me-3">
                     <i class="fas fa-eye"></i>0 espectadores
                 </span> -->
+                <button id="toggle-chat" class="btn btn-outline-light me-2">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
                 <div id="userMenu" class="dropdown" style="display: none;">
                     <button class="btn btn-outline-light dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown">
                         <span id="userName"></span>
@@ -35,23 +38,22 @@
     </nav>
 
     <div class="container-fluid h-100">
-        <div class="row h-100">
+        <div class="h-100">
             <!-- Player -->
-            <div class="col-md-8 p-0 h-100">
+            <div id="player-container">
                 <div class="player-container">
                     <video id="player" class="video-js vjs-default-skin vjs-big-play-centered" controls>
                         <source src="http://localhost:8000/live/stream.m3u8" type="application/x-mpegURL">
                     </video>
                     <div class="stream-info">
                         <h2 class="stream-title">Título da Transmissão</h2>
-                        <p class="stream-description">Descrição da transmissão</p>
-                        
+                        <p class="streasm-description">Descrição da transmissão</p>
                     </div>
                 </div>
             </div>
 
             <!-- Chat -->
-            <div class="col-md-4 p-0 h-100">
+            <div id="chat-sidebar">
                 <div class="chat-container">
                     <div class="chat-tabs" style="display: none;">
                         <div class="tab-buttons">

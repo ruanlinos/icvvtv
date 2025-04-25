@@ -544,7 +544,7 @@ body {
 .player-container {
     position: relative;
     width: 100%;
-    height: calc(100vh - 63px); /* 60px é a altura aproximada do navbar */
+    height: calc(100vh - 56px);
     background-color: var(--bg-darker);
     display: flex;
     flex-direction: column;
@@ -553,7 +553,7 @@ body {
 
 .player-container video {
     width: 100%;
-    height: calc(100vh - 192px);
+    height: 100%;
     object-fit: contain;
 }
 
@@ -563,12 +563,124 @@ body {
     left: 0;
     right: 0;
     padding: 1rem;
-    background-color: rgba(0, 0, 0, 0.8);
     color: white;
     z-index: 10;
     display: flex;
     flex-direction: column;
+    gap: 0.5rem;
+}
+
+.stream-title {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: white;
+}
+
+.stream-description {
+    margin: 0.5rem 0;
+    font-size: 1rem;
+    opacity: 0.9;
+    color: white;
+}
+
+.stream-status {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.9rem;
+    font-weight: bold;
+    color: white;
+}
+
+.stream-status.offline {
+    background-color: #dc3545;
+}
+
+.stream-status.live {
+    background-color: #28a745;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+.chat-input input:disabled {
+    background-color: #2a2a2a;
+    color: #666;
+    cursor: not-allowed;
+    border: 1px solid #333;
+    opacity: 0.7;
+}
+
+.chat-input button:disabled {
+    background-color: #2a2a2a;
+    color: #666;
+    cursor: not-allowed;
+    border: 1px solid #333;
+    opacity: 0.7;
+}
+
+/* Estilos para o toggle do chat */
+#toggle-chat {
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    display: flex;
+    align-items: center;
     justify-content: center;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+#toggle-chat i {
+    transition: transform 0.3s ease;
+}
+
+#toggle-chat:hover {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+#chat-sidebar {
+    transition: all 0.3s ease;
+    width: 450px;
+    position: fixed;
+    right: 0;
+    top: 56px; /* Altura da navbar */
+    bottom: 0;
+    background-color: var(--bg-dark);
+    z-index: 1000;
+}
+
+#chat-sidebar.collapsed {
+    transform: translateX(100%);
+}
+
+#player-container {
+    transition: all 0.3s ease;
+    width: calc(100% - 250px);
+    margin-right: 250px;
+}
+
+#player-container.expanded {
+    width: 100%;
+    margin-right: 0;
+}
+
+.player-container video {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
 }
 
 .stream-title {

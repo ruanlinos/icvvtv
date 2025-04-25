@@ -12,9 +12,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     const showRegisterBtn = document.querySelector('#show-register');
     const showLoginBtn = document.querySelector('#show-login');
     const spectatorsList = document.getElementById('spectators-list');
+    const toggleChatBtn = document.getElementById('toggle-chat');
+    const chatSidebar = document.getElementById('chat-sidebar');
+    const playerContainer = document.getElementById('player-container');
 
     let isAuthenticated = false;
     let isAdmin = false;
+    let isChatVisible = true;
 
     // Função para carregar o conteúdo do painel admin
     async function loadAdminContent() {
@@ -501,4 +505,24 @@ document.addEventListener('DOMContentLoaded', async () => {
             messageElement.remove();
         }
     });
+
+    // Função para controlar a visibilidade do chat
+    function toggleChat() {
+        isChatVisible = !isChatVisible;
+        chatSidebar.classList.toggle('collapsed');
+        playerContainer.classList.toggle('expanded');
+        
+        // Atualiza o ícone do botão
+        const icon = toggleChatBtn.querySelector('i');
+        if (isChatVisible) {
+            icon.classList.remove('fa-chevron-right');
+            icon.classList.add('fa-chevron-left');
+        } else {
+            icon.classList.remove('fa-chevron-left');
+            icon.classList.add('fa-chevron-right');
+        }
+    }
+
+    // Adiciona o evento de clique ao botão de toggle
+    toggleChatBtn.addEventListener('click', toggleChat);
 }); 
