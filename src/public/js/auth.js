@@ -97,6 +97,7 @@ document.addEventListener('DOMContentLoaded', () => {
     logoutBtn.addEventListener('click', (e) => {
         e.preventDefault();
         localStorage.removeItem('authToken');
+        localStorage.removeItem('token');
         userMenu.style.display = 'none';
         showLoginOverlay();
         disableChat();
@@ -133,7 +134,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     registerForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const name = document.getElementById('register-name').value;
+        const username = document.getElementById('register-username').value;
         const email = document.getElementById('register-email').value;
         const password = document.getElementById('register-password').value;
         const confirmPassword = document.getElementById('register-confirm-password').value;
@@ -150,7 +151,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ name, email, password })
+                body: JSON.stringify({ username, email, password })
             });
 
             const data = await response.json();

@@ -604,4 +604,78 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Carrega informações iniciais
     loadStreamInfo();
+
+    // Função para criar elemento de mensagem
+    function createMessageElement(message) {
+        const messageElement = document.createElement('div');
+        messageElement.className = 'message';
+        messageElement.dataset.messageId = message.id;
+        
+        const usernameSpan = document.createElement('span');
+        usernameSpan.className = 'message-username';
+        usernameSpan.textContent = message.username;
+        
+        const textSpan = document.createElement('span');
+        textSpan.className = 'message-text';
+        textSpan.textContent = message.text;
+        
+        const timeSpan = document.createElement('span');
+        timeSpan.className = 'message-time';
+        timeSpan.textContent = formatTime(message.timestamp);
+        
+        messageElement.appendChild(usernameSpan);
+        messageElement.appendChild(textSpan);
+        messageElement.appendChild(timeSpan);
+        
+        // Adicionar botão de exclusão se for admin
+        if (isAdmin) {
+            const deleteButton = document.createElement('button');
+            deleteButton.className = 'delete-message';
+            deleteButton.innerHTML = '<i class="fas fa-trash"></i>';
+            deleteButton.onclick = () => deleteMessage(message.id);
+            messageElement.appendChild(deleteButton);
+        }
+        
+        return messageElement;
+    }
+
+    // Função para excluir mensagem
+    async function deleteMessage(messageId) {
+        if (!isAdmin) return;
+        
+        try {
+            const response = await fetch('/api/chat/delete-message', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify({ messageId })
+            });
+            
+            if (response.ok) {
+                // Remover mensagem do DOM
+                const messageElement = document.querySelector(`.message[data-message-id="${messageId}"]`);
+                if (messageElement) {
+                    messageElement.remove();
+                }
+                
+                // Emitir evento para outros usuários
+                socket.emit('chat:delete', { messageId });
+            } else {
+                showMessage('Erro ao excluir mensagem', 'error');
+            }
+        } catch (error) {
+            console.error('Erro ao excluir mensagem:', error);
+            showMessage('Erro ao excluir mensagem', 'error');
+        }
+    }
+
+    // Adicionar listener para eventos de exclusão
+    socket.on('chat:delete', ({ messageId }) => {
+        const messageElement = document.querySelector(`.message[data-message-id="${messageId}"]`);
+        if (messageElement) {
+            messageElement.remove();
+        }
+    });
 }); 
